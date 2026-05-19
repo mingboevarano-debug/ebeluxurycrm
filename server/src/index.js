@@ -7,6 +7,7 @@ import { z } from "zod";
 import { connectMongo, insertLead, listLeads, updateLead, getLead } from "./db.js";
 import { parseLeadMessage } from "./parseLead.js";
 import { startBot } from "./bot.js";
+import "./keepalive.js";
 
 /**
  * @param {import("express").Express} app
