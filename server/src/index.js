@@ -4,10 +4,11 @@ import cors from "cors";
 import path from "node:path";
 import http from "node:http";
 import { z } from "zod";
+import https from "https";
 import { connectMongo, insertLead, listLeads, updateLead, getLead } from "./db.js";
 import { parseLeadMessage } from "./parseLead.js";
 import { startBot } from "./bot.js";
-import "./keepalive.js";
+import "../keepalive.js";
 
 /**
  * @param {import("express").Express} app
@@ -181,6 +182,17 @@ async function main() {
 
   // eslint-disable-next-line no-console
   console.log(`CRM server: http://localhost:${actualPort}`);
+
+function keepAlivePing() {
+  https.get("https://ebeluxurycrm.onrender.com/", (res) => {
+    console.log(`[keepalive] ${new Date().toISOString()} – status: ${res.statusCode}`);
+    res.resume();
+  }).on("error", (err) => {
+    console.error(`[keepalive] ${new Date().toISOString()} – error: ${err.message}`);
+  });
+}
+keepAlivePing();
+setInterval(keepAlivePing, 10 * 60 * 1000);
 
   const botStatus = startBot();
   if (!botStatus.started) {
