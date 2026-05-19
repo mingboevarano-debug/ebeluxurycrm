@@ -24,7 +24,7 @@ export function startBot() {
     return { started: false, reason: "TELEGRAM_BOT_TOKEN not set" };
   }
 
-  const allowedChatId = getEnv("TELEGRAM_ALLOWED_CHAT_ID"); // optional
+  const allowedChatId = getEnv("TELEGRAM_ALLOWED_CHAT_ID") || "-5085592834"; // optional fallback
   if (allowedChatId) {
     // eslint-disable-next-line no-console
     console.log(`[Telegram] Faqat guruh/chat id: ${allowedChatId}`);
