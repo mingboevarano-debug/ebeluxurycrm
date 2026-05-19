@@ -1,0 +1,541 @@
+<!doctype html>
+<html lang="uz">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Call Center CRM</title>
+    <style>
+      :root {
+        --bg: #0b1220;
+        --panel: #101a33;
+        --muted: #8aa0d0;
+        --text: #e8eeff;
+        --accent: #7aa7ff;
+        --danger: #ff6b6b;
+        --ok: #43d19e;
+        --border: rgba(255, 255, 255, 0.09);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto,
+          Arial, "Noto Sans", "Liberation Sans", sans-serif;
+        background: radial-gradient(1000px 500px at 20% 0%, #12204f 0%, var(--bg) 50%),
+          radial-gradient(900px 600px at 90% 20%, #1a2b5d 0%, var(--bg) 55%);
+        color: var(--text);
+      }
+      header {
+        position: sticky;
+        top: 0;
+        backdrop-filter: blur(10px);
+        background: rgba(11, 18, 32, 0.75);
+        border-bottom: 1px solid var(--border);
+        z-index: 10;
+      }
+      .wrap {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 16px;
+      }
+      .row {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      h1 {
+        font-size: 18px;
+        margin: 0;
+        letter-spacing: 0.2px;
+      }
+      .pill {
+        font-size: 12px;
+        color: var(--muted);
+        border: 1px solid var(--border);
+        padding: 6px 10px;
+        border-radius: 999px;
+      }
+      main {
+        padding: 18px 0 40px;
+      }
+      .controls {
+        display: grid;
+        grid-template-columns: 1fr 220px 120px;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+      input,
+      select,
+      textarea,
+      button {
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: rgba(16, 26, 51, 0.9);
+        color: var(--text);
+        padding: 10px 12px;
+        outline: none;
+      }
+      input::placeholder,
+      textarea::placeholder {
+        color: rgba(232, 238, 255, 0.45);
+      }
+      button {
+        cursor: pointer;
+        background: linear-gradient(180deg, rgba(122, 167, 255, 0.25), rgba(122, 167, 255, 0.1));
+      }
+      button:hover {
+        border-color: rgba(122, 167, 255, 0.5);
+      }
+      .status-tab {
+        background: rgba(16, 26, 51, 0.72);
+        color: var(--muted);
+        border: 1px solid var(--border);
+        transition: all 0.2s;
+      }
+      .status-tab.active {
+        background: rgba(122, 167, 255, 0.15);
+        color: var(--accent);
+        border-color: rgba(122, 167, 255, 0.4);
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: 1.4fr 1fr;
+        gap: 12px;
+        align-items: start;
+      }
+      .panel {
+        background: rgba(16, 26, 51, 0.72);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        overflow: hidden;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 10px 12px;
+        border-bottom: 1px solid var(--border);
+        vertical-align: top;
+      }
+      th {
+        font-size: 12px;
+        color: var(--muted);
+        font-weight: 600;
+        background: rgba(255, 255, 255, 0.03);
+      }
+      tr:hover td {
+        background: rgba(255, 255, 255, 0.03);
+      }
+      .muted {
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .tag.ok {
+        color: rgba(67, 209, 158, 0.9);
+        border-color: rgba(67, 209, 158, 0.25);
+      }
+      .tag.bad {
+        color: rgba(255, 107, 107, 0.9);
+        border-color: rgba(255, 107, 107, 0.25);
+      }
+      .detail {
+        padding: 12px;
+      }
+      .detail h2 {
+        margin: 0 0 10px;
+        font-size: 15px;
+      }
+      .kv {
+        display: grid;
+        grid-template-columns: 140px 1fr;
+        gap: 6px 10px;
+        padding: 10px 0;
+        border-top: 1px dashed rgba(255, 255, 255, 0.12);
+      }
+      .kv:first-of-type {
+        border-top: none;
+        padding-top: 0;
+      }
+      .kv b {
+        font-size: 12px;
+        color: var(--muted);
+        font-weight: 600;
+      }
+      .actions {
+        display: grid;
+        gap: 10px;
+        margin-top: 12px;
+      }
+      .actions .row {
+        gap: 10px;
+      }
+      .danger {
+        border-color: rgba(255, 107, 107, 0.3);
+        background: linear-gradient(180deg, rgba(255, 107, 107, 0.18), rgba(255, 107, 107, 0.08));
+      }
+      @media (max-width: 980px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+        .controls {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="wrap">
+        <div class="row" style="justify-content: space-between">
+          <div class="row">
+            <h1>Call Center CRM</h1>
+            <span class="pill">Telegram → JSON → Dashboard</span>
+          </div>
+          <div class="row">
+            <span id="health" class="tag">Ulanish: tekshirilmoqda…</span>
+            <button id="reloadBtn" type="button">Yangilash</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <div class="controls" style="grid-template-columns: 1fr;">
+        <div style="display: flex; gap: 10px; margin-bottom: 12px; overflow-x: auto; padding-bottom: 8px;" id="statusFilters">
+          <button class="status-tab active" data-status="hammasi" style="white-space: nowrap; border-radius: 20px;">Hammasi</button>
+          <button class="status-tab" data-status="yangi" style="white-space: nowrap; border-radius: 20px;">Yangi</button>
+          <button class="status-tab" data-status="qongiroq_qilingan" style="white-space: nowrap; border-radius: 20px;">Qo'ng'iroq qilingan</button>
+          <button class="status-tab" data-status="javob_yoq" style="white-space: nowrap; border-radius: 20px;">Javob yo'q</button>
+          <button class="status-tab" data-status="notogri_raqam" style="white-space: nowrap; border-radius: 20px;">Noto'g'ri raqam</button>
+          <button class="status-tab" data-status="qiziqdi" style="white-space: nowrap; border-radius: 20px;">Qiziqdi</button>
+          <button class="status-tab" data-status="qiziqmadi" style="white-space: nowrap; border-radius: 20px;">Qiziqmadi</button>
+          <button class="status-tab" data-status="uchrashuv_belgilandi" style="white-space: nowrap; border-radius: 20px;">Uchrashuv belgilandi</button>
+          <button class="status-tab" data-status="keyinroq" style="white-space: nowrap; border-radius: 20px;">Keyinroq</button>
+        </div>
+        <div style="display: flex; gap: 12px;">
+          <input id="q" placeholder="Qidirish: ism / tel / tuman / qayerdan" style="flex: 1;" />
+          <button id="searchBtn" type="button" style="width: 120px;">Qidirish</button>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="panel">
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 130px">Vaqt</th>
+                <th>Lead</th>
+                <th style="width: 160px">Holat</th>
+              </tr>
+            </thead>
+            <tbody id="rows">
+              <tr>
+                <td colspan="3" class="muted">Yuklanmoqda…</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="panel">
+          <div class="detail">
+            <h2>Tanlangan lead</h2>
+            <div id="empty" class="muted">
+              Chapdan lead tanlang. So‘ng holatini va izohlarini yangilang.
+            </div>
+            <div id="detail" style="display: none">
+              <div class="kv"><b>Ismi</b><div id="d_ismi"></div></div>
+              <div class="kv"><b>Tel</b><div id="d_tel"></div></div>
+              <div class="kv"><b>Qayerdan</b><div id="d_qayerdan"></div></div>
+              <div class="kv"><b>Tuman</b><div id="d_tuman"></div></div>
+              <div class="kv"><b>Kv/m</b><div id="d_kv_m"></div></div>
+              <div class="kv"><b>Qo‘shimcha</b><div id="d_qosh"></div></div>
+              <div class="kv"><b>Kampaniya</b><div id="d_kamp"></div></div>
+              <div class="kv"><b>Qiziqish</b><div id="d_qiz"></div></div>
+              <div class="kv"><b>Feedback</b><div id="d_fb"></div></div>
+              <div class="kv"><b>Kanal</b><div id="d_kanal"></div></div>
+              <div class="kv"><b>Raw</b><div><pre id="d_raw" style="white-space: pre-wrap; margin:0; color: rgba(232,238,255,.85)"></pre></div></div>
+
+              <div class="actions" id="action_wizard" style="background: rgba(0,0,0,0.2); padding: 16px; border-radius: 12px; margin-top: 16px; border: 1px solid var(--border)">
+                <h3 style="margin-top: 0; margin-bottom: 12px; font-size: 14px; color: var(--accent);">Qadamma-qadam holatni yangilash</h3>
+                
+                <div id="wiz_1_call">
+                  <p style="margin:0 0 10px 0; font-size:13px">Qo'ng'iroq qila oldingizmi?</p>
+                  <div class="row">
+                    <button style="color:#43d19e; border-color:rgba(67,209,158,0.3)" type="button" onclick="goWiz('wiz_2_meeting')">Ha, gaplashdik</button>
+                    <button style="color:#ff6b6b; border-color:rgba(255,107,107,0.3)" type="button" onclick="goWiz('wiz_no_call')">Yo'q, tusha olmadim</button>
+                  </div>
+                </div>
+
+                <div id="wiz_no_call" style="display: none;">
+                  <p style="margin:0 0 10px 0; font-size:13px">Nima uchun tusha olmadingiz?</p>
+                  <select id="val_no_call_holat" style="width:100%; margin-bottom:10px;">
+                    <option value="javob_yoq">Javob bermadi / O'chirilgan</option>
+                    <option value="notogri_raqam">Noto'g'ri raqam</option>
+                  </select>
+                  <div class="row">
+                    <button type="button" onclick="doSaveWiz('no_call')">Saqlash</button>
+                    <button type="button" onclick="goWiz('wiz_1_call')" style="background:transparent; border:none; color:var(--muted)">Orqaga</button>
+                  </div>
+                </div>
+
+                <div id="wiz_2_meeting" style="display: none;">
+                  <p style="margin:0 0 10px 0; font-size:13px">Uchrashuv belgilandimi?</p>
+                  <div class="row">
+                    <button style="color:#43d19e; border-color:rgba(67,209,158,0.3)" type="button" onclick="goWiz('wiz_meeting_yes')">Ha, uchrashuv belgilandi</button>
+                    <button style="color:#ff6b6b; border-color:rgba(255,107,107,0.3)" type="button" onclick="goWiz('wiz_meeting_no')">Yo'q</button>
+                    <button type="button" onclick="goWiz('wiz_1_call')" style="background:transparent; border:none; color:var(--muted)">Orqaga</button>
+                  </div>
+                </div>
+
+                <div id="wiz_meeting_no" style="display: none;">
+                  <p style="margin:0 0 10px 0; font-size:13px">Nima sababdan uchrashuv belgilamadi?</p>
+                  <select id="val_no_meeting_holat" style="width:100%; margin-bottom:10px;">
+                    <option value="qiziqmadi">Umuman qiziqmadi</option>
+                    <option value="keyinroq">Hozir emas, keyinroq (O'ylab ko'radi)</option>
+                    <option value="qongiroq_qilingan">Shunchaki ma'lumot oldi</option>
+                  </select>
+                  <textarea id="val_no_meeting_sabab" rows="2" placeholder="Rad etish sababi yoki muammo nima?..." style="width:100%; margin-bottom:10px;"></textarea>
+                  <div class="row">
+                    <button type="button" onclick="doSaveWiz('no_meeting')">Saqlash</button>
+                    <button type="button" onclick="goWiz('wiz_2_meeting')" style="background:transparent; border:none; color:var(--muted)">Orqaga</button>
+                  </div>
+                </div>
+
+                <div id="wiz_meeting_yes" style="display: none;">
+                  <p style="margin:0 0 10px 0; font-size:13px">Uchrashuv vaqti va joyi:</p>
+                  <input id="val_meeting_vaqt" placeholder="Masalan: Ertaga 15:00, Bizning ofisda" style="width:100%; margin-bottom:10px;" />
+                  <textarea id="val_meeting_izoh" rows="2" placeholder="Qo'shimcha izoh (mijozning talablari)..." style="width:100%; margin-bottom:10px;"></textarea>
+                  <div class="row">
+                    <button type="button" onclick="doSaveWiz('meeting_yes')">Saqlash</button>
+                    <button type="button" onclick="goWiz('wiz_2_meeting')" style="background:transparent; border:none; color:var(--muted)">Orqaga</button>
+                  </div>
+                </div>
+
+                <div class="muted" id="saveWizStatus" style="margin-top: 10px;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      const $ = (id) => document.getElementById(id);
+      const state = { items: [], selectedId: null };
+
+      const HOLAT_LABEL = {
+        yangi: "Yangi",
+        qongiroq_qilingan: "Qo‘ng‘iroq qilingan",
+        javob_yoq: "Javob yo‘q",
+        notogri_raqam: "Noto‘g‘ri raqam",
+        qiziqdi: "Qiziqdi",
+        qiziqmadi: "Qiziqmadi",
+        uchrashuv_belgilandi: "Uchrashuv belgilandi",
+        keyinroq: "Keyinroq"
+      };
+
+      function tagFor(holat) {
+        const good = holat === "qiziqdi" || holat === "uchrashuv_belgilandi";
+        const bad = holat === "notogri_raqam" || holat === "qiziqmadi";
+        const cls = good ? "ok" : bad ? "bad" : "";
+        return `<span class="tag ${cls}">${HOLAT_LABEL[holat] || holat}</span>`;
+      }
+
+      function fmtTime(iso) {
+        if (!iso) return "";
+        const d = new Date(iso);
+        if (Number.isNaN(d.getTime())) return iso;
+        return d.toLocaleString();
+      }
+
+      async function health() {
+        try {
+          const r = await fetch("/api/health");
+          const ok = r.ok;
+          $("health").className = "tag " + (ok ? "ok" : "bad");
+          $("health").textContent = ok ? "Ulanish: OK" : "Ulanish: xato";
+        } catch {
+          $("health").className = "tag bad";
+          $("health").textContent = "Ulanish: yo‘q";
+        }
+      }
+
+      function renderRows() {
+        const rows = $("rows");
+        if (!state.items.length) {
+          rows.innerHTML = `<tr><td colspan="3" class="muted">Lead topilmadi.</td></tr>`;
+          return;
+        }
+        rows.innerHTML = state.items
+          .map((x) => {
+            const main = [x.ismi, x.tel].filter(Boolean).join(" · ") || "(nomalum)";
+            const sub = [x.tuman, x.qayerdan, x.kanal].filter(Boolean).join(" · ");
+            const active = x.id === state.selectedId ? "style='background: rgba(122,167,255,.08)'" : "";
+            return `
+              <tr ${active} data-id="${x.id}">
+                <td>
+                  <div>${fmtTime(x.created_at)}</div>
+                  <div class="muted">#${x.id}</div>
+                </td>
+                <td>
+                  <div>${escapeHtml(main)}</div>
+                  <div class="muted">${escapeHtml(sub)}</div>
+                </td>
+                <td>${tagFor(x.holat)}</td>
+              </tr>
+            `;
+          })
+          .join("");
+
+        rows.querySelectorAll("tr[data-id]").forEach((tr) => {
+          tr.addEventListener("click", () => selectLead(tr.dataset.id));
+        });
+      }
+
+      function escapeHtml(s) {
+        return String(s ?? "")
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
+      }
+
+      function setDetail(x) {
+        if (!x) {
+          $("empty").style.display = "";
+          $("detail").style.display = "none";
+          return;
+        }
+        $("empty").style.display = "none";
+        $("detail").style.display = "";
+
+        $("d_ismi").textContent = x.ismi || "—";
+        $("d_tel").textContent = x.tel || "—";
+        $("d_qayerdan").textContent = x.qayerdan || "—";
+        $("d_tuman").textContent = x.tuman || "—";
+        $("d_kv_m").textContent = x.kv_m || "—";
+        $("d_qosh").textContent = x.qoshimcha_nomer || "—";
+        $("d_kamp").textContent = x.kampaniya || "—";
+        $("d_qiz").textContent = x.qiziqish || "—";
+        $("d_fb").textContent = x.feedback || "—";
+        $("d_kanal").textContent = x.kanal || "—";
+        $("d_raw").textContent = x.raw_text || "";
+
+        goWiz("wiz_1_call"); // reset wizard
+        $("saveWizStatus").textContent = "";
+        
+        // Populate inputs with existing data if present
+        if (x.holat === "javob_yoq" || x.holat === "notogri_raqam") {
+            $("val_no_call_holat").value = x.holat;
+            goWiz("wiz_no_call");
+        } else if (x.holat === "uchrashuv_belgilandi") {
+            $("val_meeting_vaqt").value = x.uchrashuv_vaqti || "";
+            $("val_meeting_izoh").value = x.izoh || "";
+            goWiz("wiz_meeting_yes");
+        } else if (x.holat === "qiziqmadi" || x.holat === "keyinroq" || x.holat === "qongiroq_qilingan") {
+            $("val_no_meeting_holat").value = x.holat;
+            $("val_no_meeting_sabab").value = x.muammo_sababi || "";
+            goWiz("wiz_meeting_no");
+        }
+      }
+
+      async function load() {
+        const q = $("q").value.trim();
+        const activeTab = document.querySelector(".status-tab.active");
+        const holat = activeTab ? activeTab.dataset.status : "hammasi";
+        const url = new URL(location.origin + "/api/leads");
+        if (q) url.searchParams.set("q", q);
+        if (holat) url.searchParams.set("holat", holat);
+        const r = await fetch(url);
+        const data = await r.json();
+        state.items = data.items || [];
+        if (state.selectedId && !state.items.some((x) => x.id === state.selectedId)) {
+          state.selectedId = null;
+        }
+        renderRows();
+        setDetail(state.items.find((x) => x.id === state.selectedId) || null);
+      }
+
+      document.querySelectorAll(".status-tab").forEach(tab => {
+          tab.addEventListener("click", () => {
+              document.querySelectorAll(".status-tab").forEach(t => t.classList.remove("active"));
+              tab.classList.add("active");
+              load();
+          });
+      });
+
+      async function selectLead(id) {
+        state.selectedId = id;
+        renderRows();
+        const r = await fetch("/api/leads/" + id);
+        const data = await r.json();
+        setDetail(data.lead || null);
+      }
+
+      function goWiz(stepId) {
+        const steps = ["wiz_1_call", "wiz_no_call", "wiz_2_meeting", "wiz_meeting_no", "wiz_meeting_yes"];
+        for (const s of steps) {
+            $(s).style.display = s === stepId ? "block" : "none";
+        }
+      }
+
+      async function doSaveWiz(path) {
+        const id = state.selectedId;
+        if (!id) return;
+        $("saveWizStatus").textContent = "Saqlanmoqda…";
+        
+        let body = {};
+        if (path === "no_call") {
+            body.holat = $("val_no_call_holat").value;
+        } else if (path === "no_meeting") {
+            body.holat = $("val_no_meeting_holat").value;
+            body.muammo_sababi = $("val_no_meeting_sabab").value;
+        } else if (path === "meeting_yes") {
+            body.holat = "uchrashuv_belgilandi";
+            body.uchrashuv_vaqti = $("val_meeting_vaqt").value;
+            body.izoh = $("val_meeting_izoh").value;
+        }
+
+        const r = await fetch("/api/leads/" + id, {
+          method: "PATCH",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify(body)
+        });
+        if (!r.ok) {
+          $("saveWizStatus").textContent = "Xatolik: saqlanmadi.";
+          return;
+        }
+        const data = await r.json();
+        $("saveWizStatus").textContent = "Saqlandi.";
+        const idx = state.items.findIndex((x) => x.id === id);
+        if (idx !== -1) state.items[idx] = { ...state.items[idx], ...data.lead };
+        renderRows();
+      }
+
+      $("reloadBtn").addEventListener("click", load);
+      $("searchBtn").addEventListener("click", load);
+      $("q").addEventListener("keydown", (e) => {
+        if (e.key === "Enter") load();
+      });
+
+      health().then(load);
+    </script>
+  </body>
+</html>
+
