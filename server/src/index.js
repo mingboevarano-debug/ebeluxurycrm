@@ -183,17 +183,27 @@ async function main() {
   // eslint-disable-next-line no-console
   console.log(`CRM server: http://localhost:${actualPort}`);
 
-function keepAlivePing() {
-  https.get("https://ebeluxurycrm.onrender.com/", (res) => {
-    console.log(`[keepalive] ${new Date().toISOString()} – status: ${res.statusCode}`);
-    res.resume();
-  }).on("error", (err) => {
-    console.error(`[keepalive] ${new Date().toISOString()} – error: ${err.message}`);
-  });
-}
-keepAlivePing();
-setInterval(keepAlivePing, 10 * 60 * 1000);
+  function keepAlivePing() {
+    https.get("https://ebeluxurycrm.onrender.com/", (res) => {
+      console.log(`[keepalive] ${new Date().toISOString()} – status: ${res.statusCode}`);
+      res.resume();
+    }).on("error", (err) => {
+      console.error(`[keepalive] ${new Date().toISOString()} – error: ${err.message}`);
+    });
 
+    if (actualPort) {
+      http.get(`http://localhost:${actualPort}/api/health`, (res) => {
+        console.log(`[keepalive-local] ${new Date().toISOString()} – status: ${res.statusCode}`);
+        res.resume();
+      }).on("error", (err) => {
+        console.error(`[keepalive-local] ${new Date().toISOString()} – error: ${err.message}`);
+      });
+    }
+  }
+
+  // Initial keepalive ping and schedule repeating pings every 10 minutes
+  keepAlivePing();
+  setInterval(keepAlivePing, 10 * 60 * 1000);
   const botStatus = startBot();
   if (!botStatus.started) {
     // eslint-disable-next-line no-console

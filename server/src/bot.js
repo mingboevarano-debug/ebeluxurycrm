@@ -71,18 +71,18 @@ export function startBot() {
       console.log(`=======================================\n`);
 
       // START buyrug'i uchun salomlashish
-      if (text === "/start") {
+      if (text && text.startsWith("/start")) {
         bot.sendMessage(chatId, "Assalomu alaykum! Men Call Center CRM botiman. Leadlarni avtomatik qabul qilib saqlayman.");
         return;
       }
 
       // TEMPORARILY DISABLED: Allow any chat to send messages for testing
-      /*
-      if (allowedChatId && chatId !== allowedChatId) {
-        console.log(`[Telegram Debug] Xabar rad etildi. Ruxsat etilgan chat: ${allowedChatId}, lekin xabar kelgan chat: ${chatId}`);
-        return;
-      }
-      */
+  // Temporarily allow any chat to send messages (no chat ID restriction)
+  // The following block is intentionally disabled to permit messages from any group/chat.
+  // if (allowedChatId && chatId !== allowedChatId) {
+  //   console.log(`[Telegram Debug] Xabar rad etildi. Ruxsat etilgan chat: ${allowedChatId}, lekin xabar kelgan chat: ${chatId}`);
+  //   return;
+  // }
 
       if (!text || typeof text !== "string") {
         console.log("[Telegram Debug] Matnli xabar emas, rad etildi.");
