@@ -109,6 +109,7 @@ export async function insertLead({
     kv_m: payload?.kv_m ?? null,
     qoshimcha_nomer: payload?.qoshimcha_nomer ?? null,
     kampaniya: payload?.kampaniya ?? null,
+    lead_vaqti: payload?.lead_vaqti ?? null,
     qiziqish: payload?.qiziqish ?? null,
     feedback: payload?.feedback ?? null,
     kanal: payload?.kanal ?? null,

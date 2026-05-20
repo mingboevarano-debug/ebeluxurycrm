@@ -107,8 +107,10 @@ export function startBot() {
       
       if (res.created) {
         console.log(`[Telegram] Yangi xabar olindi va Mongo DB ga saqlandi! Ismi: ${payload.ismi || "Noma'lum"}, Tel: ${payload.tel || "Noma'lum"}`);
+        bot.sendMessage(chatId, `✅ Lead muvaffaqiyatli saqlandi!\nIsmi: ${payload.ismi || "Noma'lum"}\nTel: ${payload.tel || "Noma'lum"}`);
       } else if (res.reason === "duplicate") {
         console.log(`[Telegram] Bu xabar allaqachon DB da mavjud (chatId: ${chatId}, msgId: ${messageId}).`);
+        bot.sendMessage(chatId, `⚠️ Bu lead oldin saqlangan.`);
       }
     } catch (e) {
       console.error("[Telegram] Xatolik yuz berdi:", e);

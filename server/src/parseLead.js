@@ -45,6 +45,7 @@ export function parseLeadMessage(text) {
       if (header.length >= 5) break;
     }
 
+    if (header[0]) payload.lead_vaqti = header[0];
     if (header[1]) payload.kampaniya = header[1];
     if (header[2]) payload.qiziqish = header[2];
     if (header[3]) payload.feedback = header[3];

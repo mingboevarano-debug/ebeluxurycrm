@@ -258,6 +258,14 @@
               Chapdan lead tanlang. So‘ng holatini va izohlarini yangilang.
             </div>
             <div id="detail" style="display: none">
+              <div class="kv"><b>Lead vaqti</b><div id="d_lead_vaqti_div" style="color: var(--accent); font-weight: bold;"></div></div>
+<div class="kv"><b>Ismi</b><div id="d_ismi"></div></div>
+<div class="kv"><b>Tel</b><div id="d_tel"></div></div>
+<div class="kv"><b>Qayerdan</b><div id="d_qayerdan"></div></div>
+<div class="kv"><b>Tuman</b><div id="d_tuman"></div></div>
+<div class="kv"><b>Kv/m</b><div id="d_kv_m"></div></div>
+<div class="kv"><b>Qo‘shimcha</b><div id="d_qosh"></div></div>
+<div class="kv"><b>Kampaniya</b><div id="d_kamp"></div></div>
               <div class="kv"><b>Ismi</b><div id="d_ismi"></div></div>
               <div class="kv"><b>Tel</b><div id="d_tel"></div></div>
               <div class="kv"><b>Qayerdan</b><div id="d_qayerdan"></div></div>
@@ -389,7 +397,7 @@
             return `
               <tr ${active} data-id="${x.id}">
                 <td>
-                  <div>${fmtTime(x.created_at)}</div>
+                  <div>${x.lead_vaqti ? escapeHtml(x.lead_vaqti) : fmtTime(x.created_at)}</div>
                   <div class="muted">#${x.id}</div>
                 </td>
                 <td>
@@ -424,6 +432,10 @@
         }
         $("empty").style.display = "none";
         $("detail").style.display = "";
+
+        // Header info
+        const displayTime = x.lead_vaqti ? x.lead_vaqti : fmtTime(x.created_at);
+        $("d_lead_vaqti_div").textContent = displayTime;
 
         $("d_ismi").textContent = x.ismi || "—";
         $("d_tel").textContent = x.tel || "—";
