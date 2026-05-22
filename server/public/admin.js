@@ -1,12 +1,17 @@
 document.addEventListener('DOMContentLoaded', () => {
+  // Element references
   const totalLeadsEl = document.getElementById('totalLeads');
   const statusListEl = document.getElementById('statusList');
   const upcomingListEl = document.getElementById('upcomingList');
   const refreshBtn = document.getElementById('refreshBtn');
+  const timerEl = document.getElementById('meetingTimer');
 
   // Chart instances (will be overwritten on refresh)
   let statusChart = null;
   let upcomingChart = null;
+  let statusPieChart = null;
+  let leadsLineChart = null;
+  let meetingsLineChart = null;
 
   const loadStats = async () => {
     try {
@@ -37,7 +42,6 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
       // Countdown timer for next meeting
-      const timerEl = document.getElementById('meetingTimer');
       if (upcoming.length > 0) {
         const nextMeeting = upcoming[0];
         const targetTime = new Date(nextMeeting.uchrashuv_vaqti).getTime();
@@ -60,6 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       // ----- Chart.js visualizations -----
+
       // Status Bar Chart
       const statusCtx = document.getElementById('statusChart').getContext('2d');
       const statusLabels = (data.byStatus || []).map(s => s._id);
@@ -80,10 +85,66 @@ document.addEventListener('DOMContentLoaded', () => {
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          scales: {
-            y: { beginAtZero: true }
-          }
+          scales: { y: { beginAtZero: true } }
         }
+      });
+
+      // Status Pie Chart
+      const statusPieCtx = document.getElementById('statusPieChart').getContext('2d');
+      if (statusPieChart) statusPieChart.destroy();
+      const pieColors = statusLabels.map((_, i) => `hsla(${(i * 60) % 360}, 70%, 60%, 0.6)`);
+      statusPieChart = new Chart(statusPieCtx, {
+        type: 'pie',
+        data: {
+          labels: statusLabels,
+          datasets: [{
+            data: statusCounts,
+            backgroundColor: pieColors,
+            borderColor: 'rgba(255,255,255,0.8)',
+            borderWidth: 1
+          }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+      });
+
+      // Leads per Day Line Chart
+      const leadsLineCtx = document.getElementById('leadsLineChart').getContext('2d');
+      const leadsLabels = (data.leadsPerDay || []).map(d => d._id);
+      const leadsCounts = (data.leadsPerDay || []).map(d => d.count);
+      if (leadsLineChart) leadsLineChart.destroy();
+      leadsLineChart = new Chart(leadsLineCtx, {
+        type: 'line',
+        data: {
+          labels: leadsLabels,
+          datasets: [{
+            label: 'Leads per Day',
+            data: leadsCounts,
+            fill: false,
+            borderColor: 'rgba(54, 162, 235, 0.8)',
+            tension: 0.1
+          }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+      });
+
+      // Meetings per Day Line Chart
+      const meetingsLineCtx = document.getElementById('meetingsLineChart').getContext('2d');
+      const meetingsLabels = (data.meetingsPerDay || []).map(d => d._id);
+      const meetingsCounts = (data.meetingsPerDay || []).map(d => d.count);
+      if (meetingsLineChart) meetingsLineChart.destroy();
+      meetingsLineChart = new Chart(meetingsLineCtx, {
+        type: 'line',
+        data: {
+          labels: meetingsLabels,
+          datasets: [{
+            label: 'Meetings per Day',
+            data: meetingsCounts,
+            fill: false,
+            borderColor: 'rgba(255, 99, 132, 0.8)',
+            tension: 0.1
+          }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
       });
 
       // Upcoming Meetings Line Chart
@@ -92,7 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const d = new Date(m.uchrashuv_vaqti);
         return isNaN(d) ? m.uchrashuv_vaqti : d.toLocaleString();
       });
-      const meetValues = (data.upcoming || []).map(() => 1); // each meeting as a point
+      const meetValues = (data.upcoming || []).map(() => 1);
       if (upcomingChart) upcomingChart.destroy();
       upcomingChart = new Chart(upcomingCtx, {
         type: 'line',
@@ -109,9 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          scales: {
-            y: { display: false }
-          }
+          scales: { y: { display: false } }
         }
       });
     } catch (e) {

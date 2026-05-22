@@ -40,7 +40,12 @@ button {
   padding: 0 16px;
   display: grid;
   gap: 20px;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: 1fr; /* full width cards */
+}
+.card canvas {
+  width: 100% !important;
+  height: 340px !important;
+  display: block;
 }
 .card {
   background: var(--panel);

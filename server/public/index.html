@@ -714,7 +714,21 @@ function leadTime(lead) {
         }
       }
       
-      $("statsBtn").addEventListener("click", () => { window.location.href = "/admin.html"; });
+      if ($("statsBtn")) {
+  $("statsBtn").addEventListener("click", () => { window.location.href = "/admin.html"; });
+}
+if ($("statsModalClose")) {
+  $("statsModalClose").addEventListener("click", () => {
+    $("statsModal").classList.remove("active");
+  });
+}
+if ($("statsModal")) {
+  $("statsModal").addEventListener("click", (e) => {
+    if (e.target === $("statsModal")) {
+      $("statsModal").classList.remove("active");
+    }
+  });
+}
       if ($("statsModalClose")) {
         $("statsModalClose").addEventListener("click", () => {
           $("statsModal").classList.remove("active");

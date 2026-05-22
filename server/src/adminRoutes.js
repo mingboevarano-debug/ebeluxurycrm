@@ -6,8 +6,6 @@ const router = express.Router();
 
 // Helper to format stats
 router.get("/stats", async (req, res) => {
-  console.log('Admin stats route called');
-  try {
     const total = await leadsCol.estimatedDocumentCount();
     const byStatus = await leadsCol.aggregate([
       { $group: { _id: "$holat", count: { $sum: 1 } } }
@@ -15,11 +13,10 @@ router.get("/stats", async (req, res) => {
     const upcoming = await leadsCol.find({
       uchrashuv_vaqti: { $gt: new Date() }
     }).sort({ uchrashuv_vaqti: 1 }).limit(5).toArray();
-    res.json({ total, byStatus, upcoming });
-  } catch (e) {
-    console.error(e);
-    res.status(500).json({ error: "server_error" });
-  }
+    // Provide empty placeholders for additional series
+    const leadsPerDay = [];
+    const meetingsPerDay = [];
+    res.json({ total, byStatus, upcoming, leadsPerDay, meetingsPerDay });
 });
 
 // Export leads as Excel
