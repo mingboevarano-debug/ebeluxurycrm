@@ -28,12 +28,21 @@ header h1 {
 }
 button {
   cursor: pointer;
-  background: linear-gradient(180deg, rgba(122,167,255,0.25), rgba(122,167,255,0.1));
   border: 1px solid var(--border);
   color: var(--text);
   border-radius: 8px;
-  padding: 8px 12px;
+  padding: 8px 16px;
+  font-weight: 500;
+  transition: all 0.2s ease;
 }
+.header-actions {
+  display: flex;
+  gap: 12px;
+}
+.btn-primary { background: linear-gradient(180deg, rgba(122,167,255,0.25), rgba(122,167,255,0.1)); border-color: rgba(122,167,255,0.3); }
+.btn-primary:hover { background: rgba(122,167,255,0.3); }
+.btn-success { background: linear-gradient(180deg, rgba(40,167,69,0.25), rgba(40,167,69,0.1)); border-color: rgba(40,167,69,0.3); color: #8ce99a; }
+.btn-success:hover { background: rgba(40,167,69,0.3); }
 .container {
   max-width: 1100px;
   margin: 24px auto;
@@ -80,6 +89,99 @@ li:last-child { border-bottom: none; }
   height: 250px !important;
   display: block;
 }
+
+/* Premium Timer Card Styles */
+.premium-timer-card {
+  background: linear-gradient(145deg, rgba(16, 26, 51, 0.9), rgba(11, 18, 32, 0.9));
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(122, 167, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+.premium-timer-card::before {
+  content: "";
+  position: absolute;
+  top: -50%; left: -50%; width: 200%; height: 200%;
+  background: radial-gradient(circle, rgba(122,167,255,0.05) 0%, transparent 60%);
+  z-index: 0;
+  pointer-events: none;
+}
+.timer-header, .meeting-details, .timer-display-container, .progress-container, .timer-controls {
+  position: relative;
+  z-index: 1;
+}
+.timer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.timer-header h2 { margin: 0; color: #fff; font-size: 1.1rem; }
+.status-badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.status-badge.upcoming { background: rgba(255, 193, 7, 0.2); color: #ffc107; border: 1px solid rgba(255,193,7,0.3); }
+.status-badge.live { background: rgba(40, 167, 69, 0.2); color: #28a745; border: 1px solid rgba(40,167,69,0.3); box-shadow: 0 0 10px rgba(40,167,69,0.4); animation: pulseLive 2s infinite; }
+.status-badge.finished { background: rgba(108, 117, 125, 0.2); color: #adb5bd; border: 1px solid rgba(108,117,125,0.3); }
+
+@keyframes pulseLive {
+  0% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(40, 167, 69, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
+}
+
+.meeting-title { margin: 0 0 4px; font-size: 1.3rem; font-weight: 500; color: var(--text); }
+.meeting-meta { margin: 0 0 20px; font-size: 0.9rem; color: var(--muted); }
+
+.timer-display-container { text-align: center; margin: 20px 0; }
+.timer-display {
+  font-size: 3.5rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  margin: 0;
+  background: linear-gradient(135deg, #fff, #7aa7ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 2px 10px rgba(122,167,255,0.2);
+}
+
+.progress-container {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+  margin-bottom: 24px;
+  overflow: hidden;
+}
+.progress-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #7aa7ff, #b388ff);
+  border-radius: 3px;
+  transition: width 1s linear, background 0.3s ease;
+}
+
+.timer-controls { display: flex; gap: 12px; justify-content: center; }
+.control-btn {
+  flex: 1; max-width: 120px;
+  padding: 10px 0; font-weight: 600; font-size: 0.9rem;
+  border-radius: 8px; border: none; cursor: pointer;
+  transition: all 0.2s ease;
+}
+.control-btn:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(1); }
+.control-btn.start { background: rgba(40, 167, 69, 0.15); color: #28a745; border: 1px solid rgba(40,167,69,0.3); }
+.control-btn.start:not(:disabled):hover { background: rgba(40, 167, 69, 0.25); transform: translateY(-1px); }
+.control-btn.pause { background: rgba(255, 193, 7, 0.15); color: #ffc107; border: 1px solid rgba(255,193,7,0.3); }
+.control-btn.pause:not(:disabled):hover { background: rgba(255, 193, 7, 0.25); transform: translateY(-1px); }
+.control-btn.end { background: rgba(220, 53, 69, 0.15); color: #dc3545; border: 1px solid rgba(220,53,69,0.3); }
+.control-btn.end:not(:disabled):hover { background: rgba(220, 53, 69, 0.25); transform: translateY(-1px); }
+
 @media (max-width: 600px) {
   .container { grid-template-columns: 1fr; }
+  .timer-display { font-size: 2.8rem; }
 }

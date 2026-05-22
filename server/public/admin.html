@@ -1,62 +1,94 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="uz">
 <head>
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>📊 Admin Statistics – Call Center CRM</title>
-  <meta name="description" content="Detailed statistics dashboard for the Call Center CRM application." />
+  <title>📊 Admin Statistikasi – Call Center CRM</title>
+  <meta name="description" content="Call Center CRM ilovasi uchun batafsil statistika paneli." />
   <link rel="stylesheet" href="/admin.css" />
 </head>
 <body>
   <header class="header">
-    <h1>📊 Admin Statistics</h1>
-    <button id="refreshBtn" class="btn-primary">Refresh</button>
+    <h1>📊 Admin Statistikasi</h1>
+    <div class="header-actions">
+      <button id="exportBtn" class="btn-success">Excelga yuklash</button>
+      <button id="refreshBtn" class="btn-primary">Yangilash</button>
+    </div>
   </header>
 
   <main class="container">
     <section class="card" id="totalCard">
-      <h2>Total Leads</h2>
+      <h2>Jami Lidlar</h2>
       <p class="value" id="totalLeads">—</p>
     </section>
 
+    <section class="card" id="exportCard" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+      <h2>Ma'lumotlarni Yuklash</h2>
+      <p style="color: var(--muted); margin-bottom: 15px; font-size: 0.9rem;">Barcha lidlar ma'lumotlarini Excel formatida saqlang.</p>
+      <button id="exportCardBtn" class="btn-success" style="width: 100%; max-width: 200px; font-size: 1.1rem; padding: 12px;">📥 Excelni Yuklash</button>
+    </section>
+
     <section class="card" id="statusCard">
-      <h2>Leads by Status</h2>
+      <h2>Holat bo'yicha Lidlar</h2>
       <ul id="statusList"></ul>
     </section>
 
     <section class="card" id="upcomingCard">
-      <h2>Upcoming Meetings</h2>
+      <h2>Kelgusi Uchrashuvlar</h2>
       <ul id="upcomingList"></ul>
     </section>
 
-    <section class="card" id="timerCard">
-      <h2>Next Meeting Countdown</h2>
-      <p class="value" id="meetingTimer">-</p>
+    <section class="card premium-timer-card" id="timerCard">
+      <div class="timer-header">
+        <h2>Jonli Uchrashuv Kuzatuvchisi</h2>
+        <span class="status-badge upcoming" id="meetingStatusBadge">Kutilayotgan</span>
+      </div>
+      
+      <div class="meeting-details">
+        <h3 id="meetingTitle" class="meeting-title">Kelgusi uchrashuvlar yo'q</h3>
+        <p class="meeting-meta">
+          <span id="meetingTime">--:--</span> • <span id="meetingOrganizer">Avtomatik</span> • <span class="participant-count">👥 2</span>
+        </p>
+      </div>
+
+      <div class="timer-display-container">
+        <p class="timer-display" id="meetingTimer">00:00:00</p>
+      </div>
+
+      <div class="progress-container">
+        <div class="progress-bar" id="meetingProgress"></div>
+      </div>
+
+      <div class="timer-controls">
+        <button id="startMeetingBtn" class="control-btn start" disabled>Boshlash</button>
+        <button id="pauseMeetingBtn" class="control-btn pause" disabled>To'xtatib turish</button>
+        <button id="endMeetingBtn" class="control-btn end" disabled>Tugatish</button>
+      </div>
     </section>
 
     <section class="card" id="statusPieCard">
-      <h2>Leads by Status (Pie Chart)</h2>
+      <h2>Holat bo'yicha Lidlar (Doiraviy Diagramma)</h2>
       <canvas id="statusPieChart"></canvas>
     </section>
 
     <section class="card" id="statusChartCard">
-      <h2>Leads by Status (Bar Chart)</h2>
+      <h2>Holat bo'yicha Lidlar (Ustunli Diagramma)</h2>
       <canvas id="statusChart"></canvas>
     </section>
 
     <section class="card" id="leadsPerDayCard">
-      <h2>Leads per Day (Last 7 Days)</h2>
+      <h2>Kunlik Lidlar (Oxirgi 7 kun)</h2>
       <canvas id="leadsLineChart"></canvas>
     </section>
 
     <section class="card" id="meetingsPerDayCard">
-      <h2>Meetings per Day (Next 7 Days)</h2>
+      <h2>Kunlik Uchrashuvlar (Keyingi 7 kun)</h2>
       <canvas id="meetingsLineChart"></canvas>
     </section>
 
     <section class="card" id="upcomingChartCard">
-      <h2>Upcoming Meetings (Line Chart)</h2>
+      <h2>Kelgusi Uchrashuvlar (Chiziqli Diagramma)</h2>
       <canvas id="upcomingChart"></canvas>
     </section>
   </main>
