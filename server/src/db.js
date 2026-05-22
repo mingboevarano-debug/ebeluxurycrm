@@ -2,7 +2,7 @@ import { MongoClient, ObjectId } from "mongodb";
 
 let client;
 /** @type {import("mongodb").Collection} */
-let leadsCol;
+export let leadsCol;
 
 /** @param {string} uri */
 function uriHostForLog(uri) {

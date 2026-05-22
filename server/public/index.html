@@ -188,6 +188,89 @@
         border-color: rgba(255, 107, 107, 0.3);
         background: linear-gradient(180deg, rgba(255, 107, 107, 0.18), rgba(255, 107, 107, 0.08));
       }
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 100;
+        align-items: center;
+        justify-content: center;
+      }
+      .modal.active {
+        display: flex;
+      }
+      .modal-content {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 24px;
+        max-width: 600px;
+        width: 90%;
+        max-height: 80vh;
+        overflow-y: auto;
+        position: relative;
+      }
+      .modal-close {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        background: none;
+        border: none;
+        color: var(--muted);
+        cursor: pointer;
+        font-size: 20px;
+      }
+      .modal-close:hover {
+        color: var(--text);
+      }
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 12px;
+        margin-bottom: 20px;
+      }
+      .stat-card {
+        background: rgba(122, 167, 255, 0.1);
+        border: 1px solid rgba(122, 167, 255, 0.2);
+        border-radius: 12px;
+        padding: 16px;
+        text-align: center;
+      }
+      .stat-card h3 {
+        margin: 0 0 8px 0;
+        font-size: 12px;
+        color: var(--muted);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      .stat-card .value {
+        font-size: 28px;
+        font-weight: bold;
+        color: var(--accent);
+      }
+      .stat-bar {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        margin-bottom: 10px;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.02);
+      }
+      .stat-bar-label {
+        flex: 1;
+        font-size: 13px;
+      }
+      .stat-bar-value {
+        font-weight: bold;
+        color: var(--accent);
+        font-size: 14px;
+      }
       @media (max-width: 980px) {
         .grid {
           grid-template-columns: 1fr;
@@ -208,6 +291,7 @@
           </div>
           <div class="row">
             <span id="health" class="tag">Ulanish: tekshirilmoqda…</span>
+            <!-- stats button removed -->
             <button id="reloadBtn" type="button">Yangilash</button>
           </div>
         </div>
@@ -325,9 +409,14 @@
                 </div>
 
                 <div id="wiz_meeting_yes" style="display: none;">
-                  <p style="margin:0 0 10px 0; font-size:13px">Uchrashuv vaqti va joyi:</p>
-                  <input id="val_meeting_vaqt" placeholder="Masalan: Ertaga 15:00, Bizning ofisda" style="width:100%; margin-bottom:10px;" />
-                  <textarea id="val_meeting_izoh" rows="2" placeholder="Qo'shimcha izoh (mijozning talablari)..." style="width:100%; margin-bottom:10px;"></textarea>
+                  <p style="margin:0 0 10px 0; font-size:13px">Uchrashuv vaqti:</p>
+                  <input id="val_meeting_vaqt" type="datetime-local" style="width:100%; margin-bottom:10px; padding: 10px 12px;" />
+                  
+                  <p style="margin:0 0 10px 0; font-size:13px">Uchrashuv joyi:</p>
+                  <input id="val_meeting_joyi" placeholder="Masalan: Bizning ofisda, Toshkent sh." style="width:100%; margin-bottom:10px;" />
+                  
+                  <p style="margin:0 0 10px 0; font-size:13px">Qo'shimcha izoh (talablari):</p>
+                  <textarea id="val_meeting_izoh" rows="2" placeholder="Masalan: Flan-flan narsani ko'rsatish kerak..." style="width:100%; margin-bottom:10px;"></textarea>
                   <div class="row">
                     <button type="button" onclick="doSaveWiz('meeting_yes')">Saqlash</button>
                     <button type="button" onclick="goWiz('wiz_2_meeting')" style="background:transparent; border:none; color:var(--muted)">Orqaga</button>
@@ -427,6 +516,8 @@
 function leadTime(lead) {
   return lead.lead_vaqti ? escapeHtml(lead.lead_vaqti) : fmtTime(lead.created_at);
 }
+
+      function setDetail(x) {
         if (!x) {
           $("empty").style.display = "";
           $("detail").style.display = "none";
@@ -460,6 +551,7 @@ function leadTime(lead) {
             goWiz("wiz_no_call");
         } else if (x.holat === "uchrashuv_belgilandi") {
             $("val_meeting_vaqt").value = x.uchrashuv_vaqti || "";
+            $("val_meeting_joyi").value = x.joyi || "";
             $("val_meeting_izoh").value = x.izoh || "";
             goWiz("wiz_meeting_yes");
         } else if (x.holat === "qiziqmadi" || x.holat === "keyinroq" || x.holat === "qongiroq_qilingan") {
@@ -523,6 +615,7 @@ function leadTime(lead) {
         } else if (path === "meeting_yes") {
             body.holat = "uchrashuv_belgilandi";
             body.uchrashuv_vaqti = $("val_meeting_vaqt").value;
+            body.joyi = $("val_meeting_joyi").value;
             body.izoh = $("val_meeting_izoh").value;
         }
 
@@ -548,8 +641,119 @@ function leadTime(lead) {
         if (e.key === "Enter") load();
       });
 
+      // Statistics modal
+      async function showStats() {
+        const modal = $("statsModal");
+        modal.classList.add("active");
+        
+        try {
+          const r = await fetch("/api/admin/stats");
+          const data = await r.json();
+          
+          const total = data.total || 0;
+          const upcoming = data.upcoming || [];
+          const byStatus = data.byStatus || [];
+          
+          $("stat_total").textContent = total;
+          
+          // Calculate percentages
+          const statusMap = {};
+          byStatus.forEach(s => {
+            statusMap[s._id] = s.count;
+          });
+          
+          const statusLabels = {
+            yangi: "Yangi",
+            qongiroq_qilingan: "Qo'ng'iroq qilingan",
+            javob_yoq: "Javob yo'q",
+            notogri_raqam: "Noto'g'ri raqam",
+            qiziqdi: "Qiziqdi",
+            qiziqmadi: "Qiziqmadi",
+            uchrashuv_belgilandi: "Uchrashuv belgilandi",
+            keyinroq: "Keyinroq"
+          };
+          
+          const statusBars = $("statusBars");
+          statusBars.innerHTML = byStatus
+            .sort((a, b) => b.count - a.count)
+            .map(s => {
+              const pct = total > 0 ? Math.round((s.count / total) * 100) : 0;
+              const label = statusLabels[s._id] || s._id;
+              return `
+                <div class="stat-bar">
+                  <div class="stat-bar-label">${escapeHtml(label)}</div>
+                  <div style="flex: 2; background: rgba(122,167,255,0.1); border-radius: 4px; height: 24px; display: flex; align-items: center; justify-content: center; color: var(--accent); font-size: 12px; font-weight: bold;">
+                    ${pct}% <span style="margin-left: 4px; color: var(--muted);">(${s.count})</span>
+                  </div>
+                </div>
+              `;
+            })
+            .join("");
+          
+          const upcomingHtml = $("upcomingMeetings");
+          if (upcoming.length > 0) {
+            upcomingHtml.innerHTML = upcoming
+              .slice(0, 5)
+              .map(u => {
+                const vaqt = fmtTime(u.uchrashuv_vaqti);
+                const name = u.ismi || "(nomalum)";
+                return `
+                  <div class="stat-bar">
+                    <div class="stat-bar-label" style="color: var(--accent)">${escapeHtml(name)}</div>
+                    <div class="stat-bar-value">${vaqt}</div>
+                  </div>
+                `;
+              })
+              .join("");
+          } else {
+            upcomingHtml.innerHTML = '<div class="muted" style="padding: 12px; text-align: center;">Uchrashuv yo\'q</div>';
+          }
+        } catch (e) {
+          console.error("Stats error:", e);
+          $("statusBars").innerHTML = '<div class="muted">Statistika yuklanmadi</div>';
+        }
+      }
+      
+      $("statsBtn").addEventListener("click", () => { window.location.href = "/admin.html"; });
+      if ($("statsModalClose")) {
+        $("statsModalClose").addEventListener("click", () => {
+          $("statsModal").classList.remove("active");
+        });
+      }
+      if ($("statsModal")) {
+        $("statsModal").addEventListener("click", (e) => {
+          if (e.target === $("statsModal")) {
+            $("statsModal").classList.remove("active");
+          }
+        });
+      }
+
       health().then(load);
     </script>
+    
+    <div id="statsModal" class="modal">
+      <div class="modal-content">
+        <button id="statsModalClose" class="modal-close">✕</button>
+        <h2 style="margin-top: 0; color: var(--accent);">Statistika</h2>
+        
+        <div class="stats-grid">
+          <div class="stat-card">
+            <h3>Jami Lead</h3>
+            <div class="value" id="stat_total">-</div>
+          </div>
+        </div>
+        
+        <h3 style="margin-top: 20px; margin-bottom: 10px; color: var(--muted); font-size: 12px; text-transform: uppercase;">Holatlar bo'yicha</h3>
+        <div id="statusBars" style="max-height: 300px; overflow-y: auto;">
+          <div class="muted">Yuklanmoqda…</div>
+        </div>
+        
+        <h3 style="margin-top: 20px; margin-bottom: 10px; color: var(--muted); font-size: 12px; text-transform: uppercase;">Kelasi 5 ta Uchrashuv</h3>
+        <div id="upcomingMeetings" style="max-height: 300px; overflow-y: auto;">
+          <div class="muted">Yuklanmoqda…</div>
+        </div>
+      </div>
+    </div>
   </body>
 </html>
 

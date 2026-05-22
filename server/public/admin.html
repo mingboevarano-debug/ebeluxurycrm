@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📊 Admin Statistics – Call Center CRM</title>
+  <meta name="description" content="Detailed statistics dashboard for the Call Center CRM application.">
+  <link rel="stylesheet" href="/admin.css" />
+</head>
+<body>
+  <header class="header">
+    <h1>📊 Admin Statistics</h1>
+    <button id="refreshBtn" class="btn-primary">Refresh</button>
+  </header>
+
+  <main class="container">
+    <section class="card" id="totalCard">
+      <h2>Total Leads</h2>
+      <p class="value" id="totalLeads">—</p>
+    </section>
+
+    <section class="card" id="statusCard">
+      <h2>Leads by Status</h2>
+      <ul id="statusList"></ul>
+    </section>
+
+    <section class="card" id="upcomingCard">
+      <h2>Upcoming Meetings</h2>
+      <ul id="upcomingList"></ul>
+    </section>
+    <section class="card" id="timerCard">
+      <h2>Next Meeting Countdown</h2>
+      <p id="meetingTimer" class="value">-</p>
+    </section>
+<section class="card" id="statusChartCard">
+  <h2>Leads by Status (Bar Chart)</h2>
+  <canvas id="statusChart"></canvas>
+</section>
+<section class="card" id="upcomingChartCard">
+  <h2>Upcoming Meetings (Line Chart)</h2>
+  <canvas id="upcomingChart"></canvas>
+</section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="/admin.js"></script>
+</body>
+</html>

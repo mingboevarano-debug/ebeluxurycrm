@@ -3,8 +3,9 @@ import express from "express";
 import cors from "cors";
 import path from "node:path";
 import http from "node:http";
-import { z } from "zod";
 import https from "https";
+import { z } from "zod";
+import adminRouter from "./adminRoutes.js";
 import { connectMongo, insertLead, listLeads, updateLead, getLead } from "./db.js";
 import { parseLeadMessage } from "./parseLead.js";
 import { startBot } from "./bot.js";
@@ -152,11 +153,9 @@ async function main() {
     }
   });
 
-  app.use((err, _req, res, _next) => {
-    // eslint-disable-next-line no-console
-    console.error(err);
-    res.status(500).json({ error: "server_error" });
-  });
+  // Admin API routes
+  app.use("/api/admin", adminRouter);
+
 
   const strictPort = ["1", "true", "yes"].includes(
     String(process.env.STRICT_PORT ?? "").toLowerCase()
