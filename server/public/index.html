@@ -397,7 +397,7 @@
             return `
               <tr ${active} data-id="${x.id}">
                 <td>
-                  <div>${x.lead_vaqti ? escapeHtml(x.lead_vaqti) : fmtTime(x.created_at)}</div>
+                  <div>${leadTime(x)}</div>
                   <div class="muted">#${x.id}</div>
                 </td>
                 <td>
@@ -424,7 +424,9 @@
           .replaceAll("'", "&#039;");
       }
 
-      function setDetail(x) {
+function leadTime(lead) {
+  return lead.lead_vaqti ? escapeHtml(lead.lead_vaqti) : fmtTime(lead.created_at);
+}
         if (!x) {
           $("empty").style.display = "";
           $("detail").style.display = "none";
