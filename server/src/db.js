@@ -154,14 +154,7 @@ export async function dailyMeetings() {
   return rows.map(d => mapLead(d)).filter(Boolean);
 }
 
-  const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
-  const rows = await leadsCol
-    .find({ created_at: { $gte: since } })
-    .sort({ created_at: -1 })
-    .toArray();
-  return rows.map((d) => mapLead(d)).filter(Boolean);
-}
-
+export async function listLeads(holat, q, offset, limit) {
   /** @type {import("mongodb").Filter<import("mongodb").Document>} */
   const filter = {};
   if (holat && holat !== "hammasi") filter.holat = holat;
