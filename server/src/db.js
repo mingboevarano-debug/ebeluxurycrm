@@ -130,7 +130,38 @@ export async function insertLead({
   }
 }
 
-export async function listLeads({ holat, q, limit = 200, offset = 0 }) {
+export async function recentLeads(days = 7) {
+  const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+  const rows = await leadsCol
+    .find({ created_at: { $gte: since } })
+    .sort({ created_at: -1 })
+    .toArray();
+  return rows.map((d) => mapLead(d)).filter(Boolean);
+}
+
+export async function dailyMeetings() {
+  const start = new Date();
+  start.setHours(0,0,0,0);
+  const end = new Date(start);
+  end.setDate(end.getDate() + 7);
+  const rows = await leadsCol
+    .find({
+      uchrashuv_vaqti: { $gte: start.toISOString(), $lt: end.toISOString() },
+      holat: "uchrashuv_belgilandi"
+    })
+    .sort({ uchrashuv_vaqti: 1 })
+    .toArray();
+  return rows.map(d => mapLead(d)).filter(Boolean);
+}
+
+  const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+  const rows = await leadsCol
+    .find({ created_at: { $gte: since } })
+    .sort({ created_at: -1 })
+    .toArray();
+  return rows.map((d) => mapLead(d)).filter(Boolean);
+}
+
   /** @type {import("mongodb").Filter<import("mongodb").Document>} */
   const filter = {};
   if (holat && holat !== "hammasi") filter.holat = holat;
@@ -164,7 +195,7 @@ export async function getLead(idStr) {
 export async function updateLead(idStr, patch) {
   if (!ObjectId.isValid(idStr)) return null;
   const now = new Date();
-  const allowed = ["holat", "izoh", "muammo_sababi", "uchrashuv_vaqti"];
+  const allowed = ["holat", "izoh", "muammo_sababi", "uchrashuv_vaqti", "joyi"];
   const $set = { oxirgi_ozgarish_at: now };
   for (const k of allowed) {
     if (Object.prototype.hasOwnProperty.call(patch, k) && patch[k] !== undefined) {

@@ -6,10 +6,9 @@ import http from "node:http";
 import https from "https";
 import { z } from "zod";
 import adminRouter from "./adminRoutes.js";
-import { connectMongo, insertLead, listLeads, updateLead, getLead } from "./db.js";
+import { connectMongo, insertLead, listLeads, updateLead, getLead, leadsCol } from "./db.js";
 import { parseLeadMessage } from "./parseLead.js";
 import { startBot } from "./bot.js";
-
 
 /**
  * @param {import("express").Express} app
@@ -34,16 +33,12 @@ function listenApp(app, startPort, options = {}) {
           return;
         }
         // eslint-disable-next-line no-console
-        console.warn(
-          `[HTTP] Port ${port} band; ${port + 1}-port sinayapmiz…`
-        );
+        console.warn(`[HTTP] Port ${port} band; ${port + 1}-port sinayapmiz…`);
         port++;
         bind();
       });
 
-      server.once("listening", () => {
-        resolve({ server, port });
-      });
+      server.once("listening", () => resolve({ server, port }));
 
       server.listen(port);
     }
@@ -52,19 +47,34 @@ function listenApp(app, startPort, options = {}) {
   });
 }
 
-async function main() {
-  await connectMongo();
+// Duplicate early main implementation removed – the later full implementation remains.
 
+async function main() {
   const app = express();
   app.use(cors());
   app.use(express.json({ limit: "1mb" }));
 
+  try {
+    await connectMongo();
+  } catch (e) {
+    console.error('MongoDB connection failed:', e.message);
+    // Continue without DB – routes that need DB will handle missing collection
+  }
+
+  // Middleware to ensure DB is connected before handling DB routes
+  app.use((req, res, next) => {
+    if (!leadsCol) {
+      // eslint-disable-next-line no-console
+      console.error('Database not connected – rejecting request');
+      return res.status(503).json({ error: 'Database unavailable' });
+    }
+    next();
+  });
+
   const publicDir = path.resolve(process.cwd(), "public");
   app.use("/", express.static(publicDir));
 
-  app.get("/api/health", (_req, res) => {
-    res.json({ ok: true });
-  });
+  app.get("/api/health", (_req, res) => res.json({ ok: true }));
 
   app.get("/api/leads", async (req, res, next) => {
     try {
@@ -81,8 +91,7 @@ async function main() {
 
   app.get("/api/leads/:id", async (req, res, next) => {
     try {
-      const id = req.params.id;
-      const lead = await getLead(id);
+      const lead = await getLead(req.params.id);
       if (!lead) return res.status(404).json({ error: "not_found" });
       res.json({ lead });
     } catch (e) {
@@ -92,7 +101,6 @@ async function main() {
 
   app.patch("/api/leads/:id", async (req, res, next) => {
     try {
-      const id = req.params.id;
       const schema = z
         .object({
           holat: z
@@ -104,21 +112,20 @@ async function main() {
               "qiziqdi",
               "qiziqmadi",
               "uchrashuv_belgilandi",
-              "keyinroq"
+              "keyinroq",
             ])
             .optional(),
           izoh: z.string().max(2000).optional(),
           muammo_sababi: z.string().max(2000).optional(),
-          uchrashuv_vaqti: z.string().max(64).optional()
+          uchrashuv_vaqti: z.string().max(64).optional(),
+          joyi: z.string().max(2000).optional(),
         })
         .strict();
 
       const parsed = schema.safeParse(req.body ?? {});
-      if (!parsed.success) {
-        return res.status(400).json({ error: "bad_request" });
-      }
+      if (!parsed.success) return res.status(400).json({ error: "bad_request" });
 
-      const updated = await updateLead(id, parsed.data);
+      const updated = await updateLead(req.params.id, parsed.data);
       if (!updated) return res.status(404).json({ error: "not_found" });
       res.json({ lead: updated });
     } catch (e) {
@@ -132,20 +139,18 @@ async function main() {
         .object({
           source_chat_id: z.string().optional(),
           source_message_id: z.string().optional(),
-          text: z.string().min(1)
+          text: z.string().min(1),
         })
         .strict();
       const parsed = schema.safeParse(req.body ?? {});
-      if (!parsed.success) {
-        return res.status(400).json({ error: "bad_request" });
-      }
+      if (!parsed.success) return res.status(400).json({ error: "bad_request" });
 
       const payload = parseLeadMessage(parsed.data.text);
       const result = await insertLead({
         sourceChatId: parsed.data.source_chat_id ?? null,
         sourceMessageId: parsed.data.source_message_id ?? null,
         rawText: parsed.data.text,
-        payload
+        payload,
       });
       res.json({ ok: true, ...result });
     } catch (e) {
@@ -156,7 +161,6 @@ async function main() {
   // Admin API routes
   app.use("/api/admin", adminRouter);
 
-
   const strictPort = ["1", "true", "yes"].includes(
     String(process.env.STRICT_PORT ?? "").toLowerCase()
   );
@@ -166,7 +170,7 @@ async function main() {
   try {
     const { port } = await listenApp(app, startPort, {
       strict: strictPort,
-      maxAttempts: 25
+      maxAttempts: 25,
     });
     actualPort = port;
   } catch (err) {
@@ -203,6 +207,7 @@ async function main() {
   // Initial keepalive ping and schedule repeating pings every 10 minutes
   keepAlivePing();
   setInterval(keepAlivePing, 10 * 60 * 1000);
+
   const botStatus = startBot();
   if (!botStatus.started) {
     // eslint-disable-next-line no-console
