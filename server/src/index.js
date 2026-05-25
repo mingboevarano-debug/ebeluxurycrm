@@ -82,7 +82,7 @@ async function main() {
       const q = req.query.q ? String(req.query.q) : "";
       const limit = req.query.limit ? Number(req.query.limit) : 200;
       const offset = req.query.offset ? Number(req.query.offset) : 0;
-      const items = await listLeads({ holat, q, limit, offset });
+      const items = await listLeads(holat, q, offset, limit);
       res.json({ items });
     } catch (e) {
       next(e);
