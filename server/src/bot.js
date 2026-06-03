@@ -7,6 +7,13 @@ function getEnv(name) {
   return v && String(v).trim() ? String(v).trim() : null;
 }
 
+function telegramBotEnabledFromEnv() {
+  const raw = process.env.TELEGRAM_BOT_ENABLED;
+  if (raw == null || String(raw).trim() === "") return false; // Default: DISABLED for testing
+  const s = String(raw).trim().toLowerCase();
+  return !["0", "false", "no", "off"].includes(s);
+}
+
 function telegramEnabledFromEnv() {
   const raw = process.env.TELEGRAM_ENABLED;
   if (raw == null || String(raw).trim() === "") return true;
@@ -15,6 +22,11 @@ function telegramEnabledFromEnv() {
 }
 
 export function startBot() {
+  // Check if bot mode is explicitly enabled
+  if (!telegramBotEnabledFromEnv()) {
+    return { started: false, reason: "TELEGRAM_BOT_ENABLED=off (testing real account mode)" };
+  }
+
   if (!telegramEnabledFromEnv()) {
     return { started: false, reason: "TELEGRAM_ENABLED=off" };
   }
@@ -24,11 +36,8 @@ export function startBot() {
     return { started: false, reason: "TELEGRAM_BOT_TOKEN not set" };
   }
 
-  const allowedChatId = getEnv("TELEGRAM_ALLOWED_CHAT_ID") || "-5085592834"; // optional fallback
-  if (allowedChatId) {
-    // eslint-disable-next-line no-console
-    console.log(`[Telegram] Faqat guruh/chat id: ${allowedChatId}`);
-  }
+  // REMOVED: Chat ID restriction - bot now accepts messages from any chat/group
+  
   const bot = new TelegramBot(token, { polling: true });
 
   let pollingStopped = false;
@@ -76,22 +85,14 @@ export function startBot() {
         return;
       }
 
-      // TEMPORARILY DISABLED: Allow any chat to send messages for testing
-  // Temporarily allow any chat to send messages (no chat ID restriction)
-  // The following block is intentionally disabled to permit messages from any group/chat.
-  // if (allowedChatId && chatId !== allowedChatId) {
-  //   console.log(`[Telegram Debug] Xabar rad etildi. Ruxsat etilgan chat: ${allowedChatId}, lekin xabar kelgan chat: ${chatId}`);
-  //   return;
-  // }
-
       if (!text || typeof text !== "string") {
         console.log("[Telegram Debug] Matnli xabar emas, rad etildi.");
         return;
       }
 
       // Heuristic: only ingest messages that look like the form
-      if (!/Ismi\s*:/i.test(text) && !/Tel\s*:/i.test(text)) {
-        console.log("[Telegram Debug] Xabar tarkibida 'Ismi:' yoki 'Tel:' topilmadi, rad etildi.");
+      if (!/Ismi?\s*:/i.test(text) && !/Tel\s*:/i.test(text)) {
+        console.log("[Telegram Debug] Xabar tarkibida 'Ism:' yoki 'Tel:' topilmadi, rad etildi.");
         return;
       }
 

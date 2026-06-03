@@ -9,6 +9,7 @@ import adminRouter from "./adminRoutes.js";
 import { connectMongo, insertLead, listLeads, updateLead, getLead, leadsCol } from "./db.js";
 import { parseLeadMessage } from "./parseLead.js";
 import { startBot } from "./bot.js";
+import { startTelegramListeners, stopTelegramListeners } from "./telegramListeners.js";
 
 /**
  * @param {import("express").Express} app
@@ -208,6 +209,7 @@ async function main() {
   keepAlivePing();
   setInterval(keepAlivePing, 10 * 60 * 1000);
 
+  // ===== BOT MODE =====
   const botStatus = startBot();
   if (!botStatus.started) {
     // eslint-disable-next-line no-console
@@ -216,6 +218,34 @@ async function main() {
     // eslint-disable-next-line no-console
     console.log("Bot started: yes");
   }
+
+  // ===== REAL USER ACCOUNT MODE (ENABLED FOR TESTING) =====
+  try {
+    const listenerStatus = await startTelegramListeners();
+    if (listenerStatus.started) {
+      // eslint-disable-next-line no-console
+      console.log(`[Main] Real Telegram Account: ✓ listening to ${listenerStatus.groups} group(s)`);
+    } else {
+      // eslint-disable-next-line no-console
+      console.warn(`[Main] Real Telegram Account: ✗ ${listenerStatus.reason}`);
+    }
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error("[Main] Telegram listeners xatosi:", err.message);
+  }
+
+  // Graceful shutdown
+  process.on("SIGINT", async () => {
+    // eslint-disable-next-line no-console
+    console.log("\n[Main] Server shutting down...");
+    try {
+      await stopTelegramListeners();
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error("[Main] Telegram shutdown xatosi:", err.message);
+    }
+    process.exit(0);
+  });
 }
 
 main().catch((err) => {
