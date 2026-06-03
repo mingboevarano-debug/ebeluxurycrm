@@ -116,7 +116,7 @@ export async function insertLead({
     holat: "yangi",
     izoh: null,
     muammo_sababi: null,
-    uchrashuv_vaqti: null,
+    uchrashuv_vaqti: payload?.uchrashuv_vaqti ? new Date(payload.uchrashuv_vaqti) : null,
     oxirgi_ozgarish_at: now
   };
 
